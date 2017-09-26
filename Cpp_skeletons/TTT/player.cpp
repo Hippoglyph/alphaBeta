@@ -18,7 +18,6 @@ int alphabeta(const GameState &state, int depth, int a, int b, bool pa){
 			v = -1;
 		else
 			v = 0;
-
 	}
 	else if(pa){
 		v = std::numeric_limits<int>::min();

@@ -41,7 +41,7 @@ int alphabeta(const GameState &state, int depth, int a, int b, bool pa){
 				v = 0;
 			else if(score>0)
 				v = 1;
-			else
+			else 
 				v = -1;
 		}*/
 	}
