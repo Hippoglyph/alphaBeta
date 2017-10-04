@@ -10,7 +10,7 @@ int alphabeta(const GameState &state, int depth, int a, int b, bool pa){
 	int v = 2;
 	std::vector<GameState> nextStates;
 	state.findPossibleMoves(nextStates);
-	if(depth == 0 || nextStates.size()==0){
+	if(depth <= 0 || nextStates.size()==0){
 		if(state.isXWin()) 
 			v = 1;
 		else if(state.isOWin()) 
