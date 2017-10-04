@@ -3,14 +3,15 @@
 #include <iostream>
 #include <limits>
 #include <cmath>
+#include <unistd.h>	
 
 namespace TICTACTOE3D
 {
-int alphabeta(const GameState &state, int depth, int a, int b, bool pa){
+int alphabeta(const GameState &state, int depth, int a, int b, bool pa,const Deadline &pDue){
 	int v = 2;
 	std::vector<GameState> nextStates;
 	state.findPossibleMoves(nextStates);
-	if(depth <= 0 || nextStates.size()==0){
+	if(depth <= 0 || nextStates.size()==0||(pDue.getSeconds() - pDue.now().getSeconds())<0.07){
 		if(state.isXWin()) 
 			v = 1;
 		else if(state.isOWin()) 
@@ -48,7 +49,7 @@ int alphabeta(const GameState &state, int depth, int a, int b, bool pa){
 	else if(pa){
 		v = std::numeric_limits<int>::min();
 		for(int i = 0; i< nextStates.size();++i){
-			v = std::max(v,alphabeta(nextStates[i],depth-1,a,b,false));
+			v = std::max(v,alphabeta(nextStates[i],depth-1,a,b,false,pDue));
 			a = std::max(a,v);
 			if(b<=a)
 				break;
@@ -57,7 +58,7 @@ int alphabeta(const GameState &state, int depth, int a, int b, bool pa){
 	else{
 		v = std::numeric_limits<int>::max();
 		for(int i = 0; i< nextStates.size();++i){
-			v = std::min(v,alphabeta(nextStates[i],depth-1,a,b,true));
+			v = std::min(v,alphabeta(nextStates[i],depth-1,a,b,true,pDue));
 			b = std::min(b,v);
 			if(b<=a)
 				break;
@@ -74,17 +75,21 @@ GameState Player::play(const GameState &pState,const Deadline &pDue)
     pState.findPossibleMoves(lNextStates);
 
     
+
     if (lNextStates.size() == 0) return GameState(pState, Move());
 
     int bestOption = std::numeric_limits<int>::min();
     int index = -1;
     for(int i = 0; i< lNextStates.size();++i){
-		int newVal= alphabeta(lNextStates[i],1,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false);
+    	//std::cerr << std::endl << i << std::endl;
+		int newVal= alphabeta(lNextStates[i],5,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false,pDue);
+		//std::cerr << newVal << std::endl;
 		if(std::max(bestOption,newVal)!=bestOption){
 			index = i;
 			bestOption = newVal;
 		}
 	}
+	//std::cerr  << lNextStates[index].toString(1)<< std::endl;
 	return lNextStates[index];
     /*
      * Here you should write your clever algorithms to get the best next move, ie the best
