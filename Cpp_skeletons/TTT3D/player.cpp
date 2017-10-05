@@ -7,18 +7,21 @@
 
 namespace TICTACTOE3D
 {
-int evaluate(const GameState &state){
+int Player::evaluate(const GameState &state){
 	if(state.isXWin()) 
-			return 77;
+		return 77;
 	else if(state.isOWin()) 
 		return -77;
 	else if (state.isDraw())
 		return 0;
 	else{
-		int score = 0;
+		int scoreX = 0;
+		int scoreO = 0;
 		//Row and column
 		for(int p = 0; p<4;++p){
 			for(int r = 0; r<4; ++r){
+				int x = 0;
+				int o = 0;
 				for(int c = 0; c<4; ++c){
 					if(state.at(r,c,p)&CELL_O){
 						score++;
@@ -123,12 +126,17 @@ int evaluate(const GameState &state){
 		return 76-score;
 	}
 }
-int alphabeta(const GameState &state, int depth, int a, int b, bool pa,const Deadline &pDue){
+int Player::alphabeta(const GameState &state, int depth, int a, int b, bool pa,const Deadline &pDue){
 	int v = 2;
 	std::vector<GameState> nextStates;
 	state.findPossibleMoves(nextStates);
-	if(depth <= 0 || nextStates.size()==0||(pDue.getSeconds() - pDue.now().getSeconds())<0.1)
-		v = evaluate(state);
+	std::string stateKey = state.toMessage().substr(0,64);
+	if(depth <= 0 || nextStates.size()==0||(pDue.getSeconds() - pDue.now().getSeconds())<0.1){
+		if(stateValue.find(stateKey) != stateValue.end())
+			return stateValue[stateKey];
+		else
+			v = evaluate(state);
+	}
 	else if(pa){
 		v = std::numeric_limits<int>::min();
 		for(int i = 0; i< nextStates.size();++i){
@@ -146,38 +154,30 @@ int alphabeta(const GameState &state, int depth, int a, int b, bool pa,const Dea
 			if(b<=a)
 				break;
 		}
-	
 	}
+	stateValue[stateKey] = v;
 	return v;
 }
 GameState Player::play(const GameState &pState,const Deadline &pDue)
 {
     //std::cerr << "Processing " << pState.toMessage() << std::endl;
-
+	
     std::vector<GameState> lNextStates;
     pState.findPossibleMoves(lNextStates);
-
-    
-
+	
     if (lNextStates.size() == 0) return GameState(pState, Move());
-
+	
     int bestOption = std::numeric_limits<int>::min();
     int index = -1;
     for(int i = 0; i< lNextStates.size();++i){
-    	//std::cerr << std::endl << i << std::endl;
 		int newVal= alphabeta(lNextStates[i],1,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false,pDue);
-		//std::cerr << newVal << std::endl;
 		if(std::max(bestOption,newVal)!=bestOption){
 			index = i;
 			bestOption = newVal;
 		}
 	}
-	//std::cerr  << lNextStates[index].toString(1)<< std::endl;
 	return lNextStates[index];
-    /*
-     * Here you should write your clever algorithms to get the best next move, ie the best
-     * next state. This skeleton returns a random move instead.
-     */
+	
     
     //return lNextStates[rand() % lNextStates.size()];
 }
