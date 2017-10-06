@@ -17,6 +17,8 @@ class Player
 {
 public:
     std::unordered_map<std::string, int> stateValue;
+    bool sortHelper(const GameState & a, const GameState & b);
+    void sortStates(std::vector<GameState> & nextStates);
     ///perform a move
     ///\param pState the current state of the board
     ///\param pDue time before which we must have returned

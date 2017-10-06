@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <cmath>
+#include <algorithm>
 
 
 namespace TICTACTOE3D
@@ -53,49 +54,59 @@ void Player::mapping(std::map<std::string, int> &winconditions,int p,int r, int 
 	*/
 
 }
+int scoreing(int xp, int op){
+	//Winning
+	if(op == 0){
+		if(xp == 4)
+			return 100000;
+		else if(xp == 3)
+			return 1000;
+		else if(xp == 2)
+			return 100;
+		else
+			return 10;
+	}
+	//Blocking
+	else if(xp > 0 && op > 0){
+		if(op == 3)
+			return 1500;
+		else if(op == 2)
+			return 50;
+		else
+			return 1;
+	}
+	//else
+	return 0;
+}
 int Player::evaluate(const GameState &state){
-		/**
-	*
-	*/
-
-	if(state.isXWin()) 
-		return std::numeric_limits<int>::max();
-	else if(state.isOWin()) 
-		return std::numeric_limits<int>::min();
-	else if (state.isDraw())
-		return 0;
-	else{
-		std::map<std::string, int> winconditionsX;
-	    std::map<std::string, int> winconditionsY;
-		int score = 0;
-		//Row and column
-		for(int p = 0; p<4;++p){
-			for(int r = 0; r<4;++r){
-				for(int c = 0; c<4;++c){
-					if(state.at(r,c,p)&CELL_X){
-						mapping(winconditionsX,p,r,c);
-					}
-					else if(state.at(r,c,p)&CELL_O){
-						mapping(winconditionsY,p,r,c);
-					}
+	std::map<std::string, int> winconditionsX;
+    std::map<std::string, int> winconditionsY;
+	int score = 0;
+	//Row and column
+	for(int p = 0; p<4;++p){
+		for(int r = 0; r<4;++r){
+			for(int c = 0; c<4;++c){
+				if(state.at(r,c,p)&CELL_X){
+					mapping(winconditionsX,p,r,c);
+				}
+				else if(state.at(r,c,p)&CELL_O){
+					mapping(winconditionsY,p,r,c);
 				}
 			}
 		}
-
-		for(auto kv : winconditionsX) {
-    		if(winconditionsY.find(kv.first)==winconditionsY.end()){
-    			score+=kv.second;
-    		}
-    		else{
-    			winconditionsY.erase(kv.first);
-    		}
-		}
-		for(auto kv : winconditionsY){
-			score-=kv.second;
-		}
-    	//std::cerr << "SCORE!!! " << score << std::endl;
-		return score;
 	}
+
+	for(auto kv : winconditionsX) {
+		if(winconditionsY.find(kv.first)==winconditionsY.end()){
+			score+=scoreing(kv.second,0);
+		}
+		else{
+			score+=scoreing(kv.second,winconditionsY[kv.first]);
+		}
+	}
+	//std::cerr << "SCORE!!! " << score << std::endl;
+	return score;
+
 }
 int Player::alphabeta(const GameState &state, int depth, int a, int b, bool pa,const Deadline &pDue){
 	int v = 2;
@@ -129,12 +140,40 @@ int Player::alphabeta(const GameState &state, int depth, int a, int b, bool pa,c
 	stateValue[stateKey] = v;
 	return v;
 }
+
+bool Player::sortHelper(const GameState & a, const GameState & b){
+	std::string aS = a.toMessage().substr(0,64);
+	std::string bS = b.toMessage().substr(0,64);
+	int aVal = 0;
+	int bVal = 0;
+	if(stateValue.find(aS) != stateValue.end())
+		aVal = stateValue[aS];
+	else{
+		aVal = evaluate(a);
+		stateValue[aS] = aVal;
+	}
+	if(stateValue.find(bS) != stateValue.end())
+		bVal = stateValue[bS];
+	else{
+		bVal = evaluate(b);
+		stateValue[bS] = bVal;
+	}
+	return aVal > bVal;
+}
+
+
+void Player::sortStates(std::vector<GameState> & nextStates){
+	std::sort(nextStates.begin(),nextStates.end(), 
+		[this] (const GameState & a, const GameState & b) -> bool { return sortHelper(a,b); });
+}
+
 GameState Player::play(const GameState &pState,const Deadline &pDue)
 {
     //std::cerr << "Processing " << pState.toMessage() << std::endl;
     std::vector<GameState> lNextStates;
     pState.findPossibleMoves(lNextStates);
     if (lNextStates.size() == 0) return GameState(pState, Move());
+    sortStates(lNextStates);
 
 	int dl = pState.cSquares;
     for (int i = 0; i < pState.cSquares; ++i)
