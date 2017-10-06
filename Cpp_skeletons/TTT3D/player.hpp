@@ -23,6 +23,7 @@ public:
     GameState play(const GameState &pState, const Deadline &pDue);
     int alphabeta(const GameState &state, int depth, int a, int b, bool pa,const Deadline &pDue);
     int evaluate(const GameState &state);
+    void mapping(std::map<std::string,int>&,int,int,int);
 };
 
 /*namespace TICTACTOE3D*/ }
