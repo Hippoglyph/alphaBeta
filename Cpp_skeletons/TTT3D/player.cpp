@@ -65,8 +65,8 @@ int Player::evaluate(const GameState &state){
 	else if (state.isDraw())
 		return 0;
 	else{
-	std::map<std::string, int> winconditionsX;
-    std::map<std::string, int> winconditionsY;
+		std::map<std::string, int> winconditionsX;
+	    std::map<std::string, int> winconditionsY;
 		int score = 0;
 		//Row and column
 		for(int p = 0; p<4;++p){
@@ -81,6 +81,7 @@ int Player::evaluate(const GameState &state){
 				}
 			}
 		}
+
 		for(auto kv : winconditionsX) {
     		if(winconditionsY.find(kv.first)==winconditionsY.end()){
     			score+=kv.second;
@@ -101,7 +102,7 @@ int Player::alphabeta(const GameState &state, int depth, int a, int b, bool pa,c
 	std::vector<GameState> nextStates;
 	state.findPossibleMoves(nextStates);
 	std::string stateKey = state.toMessage().substr(0,64);
-	if(depth <= 0 || nextStates.size()==0||(pDue.getSeconds() - pDue.now().getSeconds())<0.1){
+	if(depth <= 0 || nextStates.size()==0||(pDue.getSeconds() - pDue.now().getSeconds())<0.05){
 		if(stateValue.find(stateKey) != stateValue.end())
 			return stateValue[stateKey];
 		else
@@ -134,16 +135,35 @@ GameState Player::play(const GameState &pState,const Deadline &pDue)
     std::vector<GameState> lNextStates;
     pState.findPossibleMoves(lNextStates);
     if (lNextStates.size() == 0) return GameState(pState, Move());
+
+	int dl = pState.cSquares;
+    for (int i = 0; i < pState.cSquares; ++i)
+	{
+		if (pState.at(i) & CELL_X)
+			--dl;
+		else if (pState.at(i) & CELL_O)
+			--dl;
+	}
+
+	int d = -1;
+	int sum = dl;
+	int T = 2394;
+	while(sum < T){
+		sum *= --dl;
+		d++;
+	}
+	//std::cerr << "D= " << d << std::endl;
 	
     int bestOption = std::numeric_limits<int>::min();
     int index = -1;
     for(int i = 0; i< lNextStates.size();++i){
-		int newVal= alphabeta(lNextStates[i],0,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false,pDue);
+		int newVal= alphabeta(lNextStates[i],d,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false,pDue);
 		if(std::max(bestOption,newVal)!=bestOption){
 			index = i;
 			bestOption = newVal;
 		}
 	}
+	//std::cerr << "Hash size : " << stateValue.size() << std::endl;
 	return lNextStates[index];
 	
     

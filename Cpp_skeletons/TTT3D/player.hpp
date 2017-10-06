@@ -6,8 +6,9 @@
 #include "move.hpp"
 #include "gamestate.hpp"
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <string>
+#include <map>
 
 namespace TICTACTOE3D
 {
@@ -15,7 +16,7 @@ namespace TICTACTOE3D
 class Player
 {
 public:
-    std::map<std::string, int> stateValue;
+    std::unordered_map<std::string, int> stateValue;
     ///perform a move
     ///\param pState the current state of the board
     ///\param pDue time before which we must have returned
