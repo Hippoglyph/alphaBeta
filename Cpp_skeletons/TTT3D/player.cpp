@@ -75,8 +75,22 @@ int scoreing(int xp, int op){
 		else
 			return 1;
 	}
+	else if(op > 0){
+		if(op==1){
+			return -7;
+		}
+		else if(op==2){
+			return -70;
+		}
+		else if(op==3){
+			return -1200;
+		}
+		else{
+			return -120000;
+		}
+	}
 	//else
-	return 0;
+	return -10;
 }
 int Player::evaluate(const GameState &state){
 	std::map<std::string, int> winconditionsX;
@@ -102,7 +116,11 @@ int Player::evaluate(const GameState &state){
 		}
 		else{
 			score+=scoreing(kv.second,winconditionsY[kv.first]);
+			winconditionsY.erase(kv.first);
 		}
+	}
+	for(auto kv : winconditionsY){
+
 	}
 	//std::cerr << "SCORE!!! " << score << std::endl;
 	return score;
@@ -184,19 +202,20 @@ GameState Player::play(const GameState &pState,const Deadline &pDue)
 			--dl;
 	}
 
-	int d = -1;
+	/*int d = -1;
 	int sum = dl;
 	int T = 2394;
 	while(sum < T){
 		sum *= --dl;
 		d++;
 	}
+	*/
 	//std::cerr << "D= " << d << std::endl;
 	
     int bestOption = std::numeric_limits<int>::min();
     int index = -1;
-    for(int i = 0; i< lNextStates.size();++i){
-		int newVal= alphabeta(lNextStates[i],d,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false,pDue);
+    for(int i = 0; i< 4;++i){
+		int newVal= alphabeta(lNextStates[i],1,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false,pDue);
 		if(std::max(bestOption,newVal)!=bestOption){
 			index = i;
 			bestOption = newVal;
