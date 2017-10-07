@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 
+//Author Jonathan Rinnarv & Marcus Lignercrona
 
 namespace TICTACTOE3D
 {
@@ -12,7 +13,7 @@ void Player::mapping(std::map<std::string, int> &winconditions,int p,int r, int 
 	winconditions["pr"+std::to_string(p*10+r)]++;
 	winconditions["pc"+std::to_string(p*10+c)]++;
 	winconditions["rc"+std::to_string(r*10+c)]++;
-	//std::cerr << "value after input "<<winconditions["pr"+std::to_string(p*10+r)] << std::endl;
+	
 	//TRUE DIAGONALS
 	if(p==r&&r==c){
 		winconditions["trudiag1"]++;
@@ -46,14 +47,8 @@ void Player::mapping(std::map<std::string, int> &winconditions,int p,int r, int 
 	else if(r==3-c){
 		winconditions["dip"+std::to_string(p)]++;
 	}
-
-/*
-	winconditions.insert(std::make_pair(std::to_string(p*10+r),winconditions.find()));
-	winconditions.insert(std::make_pair(std::to_string(p*10+c),r));
-	winconditions.insert(std::make_pair(std::to_string(r*10+c),p));
-	*/
-
 }
+
 int scoreing(int xp, int op){
 	//Winning
 	if(op == 0){
@@ -74,20 +69,6 @@ int scoreing(int xp, int op){
 			return 50;
 		else
 			return 1;
-	}
-	else if(op > 0){
-		if(op==1){
-			return -7;
-		}
-		else if(op==2){
-			return -70;
-		}
-		else if(op==3){
-			return -1200;
-		}
-		else{
-			return -120000;
-		}
 	}
 	//else
 	return -10;
@@ -122,7 +103,7 @@ int Player::evaluate(const GameState &state){
 	for(auto kv : winconditionsY){
 
 	}
-	//std::cerr << "SCORE!!! " << score << std::endl;
+	
 	return score;
 
 }
@@ -187,45 +168,22 @@ void Player::sortStates(std::vector<GameState> & nextStates){
 
 GameState Player::play(const GameState &pState,const Deadline &pDue)
 {
-    //std::cerr << "Processing " << pState.toMessage() << std::endl;
     std::vector<GameState> lNextStates;
     pState.findPossibleMoves(lNextStates);
     if (lNextStates.size() == 0) return GameState(pState, Move());
     sortStates(lNextStates);
-
-	int dl = pState.cSquares;
-    for (int i = 0; i < pState.cSquares; ++i)
-	{
-		if (pState.at(i) & CELL_X)
-			--dl;
-		else if (pState.at(i) & CELL_O)
-			--dl;
-	}
-
-	/*int d = -1;
-	int sum = dl;
-	int T = 2394;
-	while(sum < T){
-		sum *= --dl;
-		d++;
-	}
-	*/
-	//std::cerr << "D= " << d << std::endl;
+    int candidates = std::min((int)lNextStates.size(), 2);
 	
     int bestOption = std::numeric_limits<int>::min();
     int index = -1;
-    for(int i = 0; i< 4;++i){
+    for(int i = 0; i< candidates;++i){
 		int newVal= alphabeta(lNextStates[i],1,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false,pDue);
 		if(std::max(bestOption,newVal)!=bestOption){
 			index = i;
 			bestOption = newVal;
 		}
 	}
-	//std::cerr << "Hash size : " << stateValue.size() << std::endl;
 	return lNextStates[index];
-	
-    
-    //return lNextStates[rand() % lNextStates.size()];
 }
 
 /*namespace TICTACTOE3D*/ }
