@@ -11,7 +11,7 @@ int alphabeta(const GameState &state, int depth, int a, int b, bool pa){
 	int v = 2;
 	std::vector<GameState> nextStates;
 	state.findPossibleMoves(nextStates);
-	if(depth == 0 || nextStates.size()==0){
+	if(depth <= 0 || nextStates.size()==0){
 		if(state.isXWin()) 
 			v = 1;
 		else if(state.isOWin()) 
@@ -50,7 +50,7 @@ GameState Player::play(const GameState &pState,const Deadline &pDue)
     int bestOption = std::numeric_limits<int>::min();
     int index = -1;
     for(int i = 0; i< lNextStates.size();++i){
-		int newVal= alphabeta(lNextStates[i],20,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false);
+		int newVal= alphabeta(lNextStates[i],5,std::numeric_limits<int>::min(),std::numeric_limits<int>::max(),false);
 		if(std::max(bestOption,newVal)!=bestOption){
 			index = i;
 			bestOption = newVal;
